@@ -24,6 +24,7 @@ try:
     if hdl.is_connected():
         print('Successfully connected to MySQL database')
 except:
+    print('Could not connect to MySQL Server')
     print(Error)
     exit()
 
@@ -124,13 +125,16 @@ def mainMenu():
     print(" 5 --> End Program")
     print("_____________________________________")
 
+
 def staffMenu():
     print("_____________________________________")
     print(" 1 --> Modify beds available")
     print(" 2 --> Add new doctor")
     print(" 3 --> Remove doctor")
-    print(" 4 --> Change your password")
-    print(" 5 --> Go back to Main Menu")
+    print(" 4 --> Create new staff login")
+    print(" 5 --> Remove staff login")
+    print(" 6 --> Change your password")
+    print(" 7 --> Go back to Main Menu")
     print("_____________________________________")
 
 
@@ -144,32 +148,76 @@ while choice != 5:
     if choice == 1:
         print("_____________________________________")
         id = input('ID: ')
-        val = list()
-        val.append(id)
         pwd = getpass(prompt='Password: ')
-        sql = "SELECT password FROM login WHERE id = %s"
-        mycursor.execute(sql, val)
-        data = mycursor.fetchone()
-        if pwd in data:
+
+        mycursor.execute("SELECT * FROM login")
+        idList = mycursor.fetchall()
+
+        if (id, pwd) in idList:
             staffMenu()
             staff_choice = int(input("Enter your choice- "))
-            if choice == 1:
+            if staff_choice == 1:
                 beds = input('How many beds are available now? ')
                 sql = "UPDATE beds SET available = " + beds + " WHERE data= \"Available Beds\""
                 mycursor.execute(sql)
                 hdl.commit()
                 print("Number of beds available modified to " + beds)
-            
-            if choice == 2:
-                pass
-            
-            if choice == 3:
-                pass
-            
-            if choice == 4:
-                pass
+
+            elif staff_choice == 2:
+                doc_info = list()
+                doc_info.append(input('Enter doctor ID: '))
+                doc_info.append(input('Enter doctor name: '))
+                doc_info.append(input('Enter doctor specialization: '))
+                sql = "INSERT INTO doctor VALUES (%s, %s, %s, 0)"
+                mycursor.execute(sql, doc_info)
+                hdl.commit()
+                print('New doctor added to database, going back to Main Menu')
+
+            elif staff_choice == 3:
+                id = input('Enter doctor ID to be removed: ')
+                sql = "DELETE FROM doctor WHERE id = \"" + id + "\""
+                mycursor.execute(sql)
+                hdl.commit()
+                print("Doctor ID " + id + " removed from database, going back to Main Menu")
+
+            elif staff_choice == 4:
+                staff_info = list()
+                staff_info.append(input('Enter new staff ID: '))
+                staff_info.append(input('Enter new staff password: '))
+                sql = "INSERT INTO login VALUES (%s, %s)"
+                mycursor.execute(sql, staff_info)
+                hdl.commit()
+                print('New staff login created, going back to Main Menu')
+
+            elif staff_choice == 5:
+                id = input('Enter staff ID to be removed: ')
+                sql = "DELETE FROM login WHERE id = \"" + id + "\""
+                mycursor.execute(sql)
+                hdl.commit()
+                print("Staff ID " + id + " removed from database, going back to Main Menu")
+
+            elif staff_choice == 6:
+                current = getpass(prompt='Enter current password: ')
+                if current == pwd:
+                    new0 = getpass(prompt='Enter new password: ')
+                    new1 = getpass(prompt='Confirm new password: ')
+                    if new0 == new1:
+                        sql = "UPDATE login SET password = \"" + new0 + "\" WHERE id = \"" + id + "\""
+                        mycursor.execute(sql)
+                        hdl.commit()
+                        print('Password updated, going back to Main Menu')
+                    else:
+                        print('Password does not match, going back to Main Menu')
+                else:
+                    print('Incorrect password, going back to Main Menu')
+
+            elif staff_choice == 7:
+                print('Opening Main Menu')
+
+            else:
+                print('Incorrect Choice, going back to Main Menu')
         else:
-            'Incorrect Password, going back to Main Menu'
+            print('Incorrect login details, going back to Main Menu')
 
     elif choice == 2:
         pass

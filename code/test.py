@@ -1,8 +1,7 @@
-beds = input('How many beds are available now? ')
-newBeds = list()
-newBeds.append(beds)
-sql = "UPDATE beds SET available =" + beds + "WHERE data= \"Available Beds\""
-
+new0 = input()
+val = list()
+val.append("abc")
+sql = "UPDATE login SET password = " + new0 + " WHERE id = \"%s\""
 print(sql)
 
 # import mysql.connector
