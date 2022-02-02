@@ -1,9 +1,6 @@
-# import datetime
-
 import mysql.connector
 from mysql.connector import Error
 from getpass import getpass
-
 
 def checkTableExists(tablename):
     mycursor.execute("""
@@ -14,7 +11,6 @@ def checkTableExists(tablename):
     if mycursor.fetchone()[0] == 1:
         return True
     return False
-
 
 hdl = None
 try:
@@ -115,7 +111,6 @@ else:
         )
         """)
 
-
 def mainMenu():
     print("_____________________________________")
     print(" 1 --> Hospital Staff")
@@ -124,7 +119,6 @@ def mainMenu():
     print(" 4 --> Blood Bank/Blood Donation")
     print(" 5 --> End Program")
     print("_____________________________________")
-
 
 def staffMenu():
     print("_____________________________________")
@@ -136,6 +130,15 @@ def staffMenu():
     print(" 6 --> Change your password")
     print(" 7 --> Go back to Main Menu")
     print("_____________________________________")
+
+def docMenu(name):
+    print("_____________________________________")
+    print('Welcome ' + name)
+    print('1 --> Mark available for today')
+    print('2 --> Mark unavailable for today')
+    print('3 --> Go back to Main Menu')
+    print("_____________________________________")
+
 
 
 print("_____________________________________")
@@ -220,8 +223,33 @@ while choice != 5:
             print('Incorrect login details, going back to Main Menu')
 
     elif choice == 2:
-        pass
-        # mark available for today or mark unavailable
+        print("_____________________________________")
+        id = input('Enter doctor ID: ')
+        mycursor.execute("SELECT id FROM doctor")
+        idList = mycursor.fetchall()
+
+        if (id,) in idList:
+            sql = 'SELECT name FROM doctor where id = \"' + id +'\"'
+            mycursor.execute(sql)
+            name = mycursor.fetchone()[0]
+            docMenu(name)
+            doc_choice = int(input("Enter your choice- "))
+            if doc_choice == 1:
+                sql = "UPDATE doctor SET available_today = 1 WHERE id= \"" + id + "\""
+                mycursor.execute(sql)
+                hdl.commit()
+                print('You are marked available now, going back to Main Menu')
+            elif doc_choice == 2:
+                sql = "UPDATE doctor SET available_today = 0 WHERE id= \"" + id + "\""
+                mycursor.execute(sql)
+                hdl.commit()
+                print('You are marked unavailable now, going back to Main Menu')
+            elif doc_choice == 3:
+                print('Opening Main Menu')
+            else:
+                print('Incorrect Choice, going back to Main Menu')
+        else:
+            print('ID not found, going back to Main Menu')
 
     elif choice == 3:
         pass
@@ -235,9 +263,8 @@ while choice != 5:
     mainMenu()
     choice = int(input("Enter choice to continue- "))
 
-
 print("Wish you health. Take Care. Bye")
 
 if hdl is not None and hdl.is_connected():
     hdl.close()
-    print('Connection closed.')
+    print('MySQL Connection closed.')
