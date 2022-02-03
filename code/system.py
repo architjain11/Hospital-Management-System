@@ -2,6 +2,7 @@ import mysql.connector
 from mysql.connector import Error
 from getpass import getpass
 
+
 def checkTableExists(tablename):
     mycursor.execute("""
         SELECT COUNT(*)
@@ -11,6 +12,7 @@ def checkTableExists(tablename):
     if mycursor.fetchone()[0] == 1:
         return True
     return False
+
 
 hdl = None
 try:
@@ -111,6 +113,7 @@ else:
         )
         """)
 
+
 def mainMenu():
     print("_____________________________________")
     print(" 1 --> Hospital Staff")
@@ -119,6 +122,7 @@ def mainMenu():
     print(" 4 --> Blood Bank/Blood Donation")
     print(" 5 --> End Program")
     print("_____________________________________")
+
 
 def staffMenu():
     print("_____________________________________")
@@ -131,14 +135,23 @@ def staffMenu():
     print(" 7 --> Go back to Main Menu")
     print("_____________________________________")
 
+
 def docMenu(name):
     print("_____________________________________")
     print('Welcome ' + name)
     print('1 --> Mark available for today')
     print('2 --> Mark unavailable for today')
-    print('3 --> Go back to Main Menu')
+    print('3 --> View your appointments')
+    print('4 --> Go back to Main Menu')
     print("_____________________________________")
 
+
+def bbMenu():
+    print("_____________________________________")
+    print('1 --> Donate Blood')
+    print('2 --> Check availability in blood bank')
+    print('3 --> Go back to Main Menu')
+    print("_____________________________________")
 
 
 print("_____________________________________")
@@ -181,7 +194,8 @@ while choice != 5:
                 sql = "DELETE FROM doctor WHERE id = \"" + id + "\""
                 mycursor.execute(sql)
                 hdl.commit()
-                print("Doctor ID " + id + " removed from database, going back to Main Menu")
+                print("Doctor ID " + id +
+                      " removed from database, going back to Main Menu")
 
             elif staff_choice == 4:
                 staff_info = list()
@@ -197,7 +211,8 @@ while choice != 5:
                 sql = "DELETE FROM login WHERE id = \"" + id + "\""
                 mycursor.execute(sql)
                 hdl.commit()
-                print("Staff ID " + id + " removed from database, going back to Main Menu")
+                print("Staff ID " + id +
+                      " removed from database, going back to Main Menu")
 
             elif staff_choice == 6:
                 current = getpass(prompt='Enter current password: ')
@@ -229,7 +244,7 @@ while choice != 5:
         idList = mycursor.fetchall()
 
         if (id,) in idList:
-            sql = 'SELECT name FROM doctor where id = \"' + id +'\"'
+            sql = 'SELECT name FROM doctor where id = \"' + id + '\"'
             mycursor.execute(sql)
             name = mycursor.fetchone()[0]
             docMenu(name)
@@ -245,6 +260,17 @@ while choice != 5:
                 hdl.commit()
                 print('You are marked unavailable now, going back to Main Menu')
             elif doc_choice == 3:
+                sql = "SELECT name, age, symptoms FROM appointments where doc_id = \"" + id + "\""
+                mycursor.execute(sql)
+                data = mycursor.fetchall()
+                if mycursor.rowcount != 0:
+                    print('(\'Name\', \'Age\', \'Symptoms\')')
+                    for row in data:
+                        print(row)
+                    print('Going back to Main Menu')
+                else:
+                    print('No appointments found, going back to Main Menu')
+            elif doc_choice == 4:
                 print('Opening Main Menu')
             else:
                 print('Incorrect Choice, going back to Main Menu')
@@ -252,13 +278,89 @@ while choice != 5:
             print('ID not found, going back to Main Menu')
 
     elif choice == 3:
-        pass
+        print("_____________________________________")
+        appointment_info = list()
+        appointment_info.append(input('Enter patient name: '))
+        appointment_info.append((input('Enter age: ')))
+        sql = "SELECT id, name, specialization FROM doctor where available_today = 1"
+        mycursor.execute(sql)
+        doc_available = mycursor.fetchall()
+        if mycursor.rowcount != 0:
+            print('Doctors available for today: ')
+            print('(\'Doctor ID\', \'Name\', \'Specialization\')')
+            for row in doc_available:
+                print(row)
+            doc_id = input('Enter doctor ID to visit from above list: ')
+            mycursor.execute("SELECT id FROM doctor where available_today = 1")
+            idList = mycursor.fetchall()
+            if (doc_id,) in idList:
+                appointment_info.append(doc_id)
+                appointment_info.append(
+                    input('Explain your symptoms in brief: '))
+                sql = "INSERT INTO appointments VALUES (%s, %s, %s, %s)"
+                mycursor.execute(sql, appointment_info)
+                hdl.commit()
+                print('Appointment Scheduled, going back to Main Menu')
+            else:
+                print('Wrong ID, going back to Main Menu')
+        else:
+            print('No doctors available today, going back to Main Menu')
 
     elif choice == 4:
-        pass
+        bbMenu()
+        bb_choice = int(input("Enter your choice- "))
+        if bb_choice == 1:
+            donation_info = list()
+            donation_info.append(input('Enter name: '))
+            donation_info.append(
+                input('Enter amount of blood donated in CC (upto two decimal values): '))
+            donation_info.append(input('Donation date (yyyy-mm-dd): '))
+            print(
+                'What do you want to donate?\n1. Blood\n2. Platelets\n3. Plasma\n4. Red Blood')
+            found = False
+            while(found != True):
+                don_type = int(input('Enter option number: '))
+                if don_type == 1:
+                    donation_info.append('Blood')
+                    found = True
+                elif don_type == 2:
+                    donation_info.append('Platelets')
+                    found = True
+                elif don_type == 3:
+                    donation_info.append('Plasma')
+                    found = True
+                elif don_type == 4:
+                    donation_info.append('Power Red')
+                    found = True
+                else:
+                    print('Invalid choice, enter again')
+            sql = "INSERT INTO donation VALUES (%s, %s, %s, %s)"
+            mycursor.execute(sql, donation_info)
+            hdl.commit()
 
-    else:
-        print('Incorrect Choice, going back to Main Menu')
+            sql = 'SELECT frequency_days FROM donation_types WHERE type = \'' + \
+                donation_info[3] + '\''
+            mycursor.execute(sql)
+            freq = mycursor.fetchone()[0]
+            print('Thank You, ' + donation_info[0] + '.')
+            print(f'You cannot donate again for the next {freq} days')
+            print('Going back to the Main Menu')
+
+        elif bb_choice == 2:
+            sql = "SELECT donation_type, sum(amount_donated_CC) FROM donation GROUP BY donation_type"
+            mycursor.execute(sql)
+            data = mycursor.fetchall()
+            if mycursor.rowcount != 0:
+                print('(\'Donation type\', \'Amount available\')')
+                for row in data:
+                    print(row)
+                print('Going back to Main Menu')
+            else:
+                print('Nothing is available right now, going back to Main Menu')
+        elif bb_choice == 3:
+            print('Opening Main menu')
+        else:
+            print('Incorrect Choice, going back to Main Menu')
 
     mainMenu()
     choice = int(input("Enter choice to continue- "))
