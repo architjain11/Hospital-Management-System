@@ -37,6 +37,3 @@ The 'Code' folder contains the file "system.py" which has our main code and can 
 ```bash
 python system.py
 ```
-
-## Miscellaneous Note
-Even though Github statistics show a high percentage of VBA, the original code is the Python file only. All other extra heavy files are automatically created by MySQL and shouldn't affect the working of the main code if the setup is done right.
