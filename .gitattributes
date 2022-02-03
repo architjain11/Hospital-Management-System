@@ -1,3 +1,2 @@
-# * linguist-vendored
-# *.py .idb .frm linguist-vendored=false
-*.vba linguist-detectable=false
+* linguist-vendored
+*.py linguist-vendored=false
