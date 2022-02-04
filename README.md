@@ -25,7 +25,7 @@ The two containers communicate between one another using MySQL Connector and the
 pip install mysql-connector-python
 ```
 ```bash
-from stdiomask import getpass
+pip install stdiomask
 ```
 In the MySQL container, we can start MySQL using the below cmd.
 
