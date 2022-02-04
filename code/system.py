@@ -237,11 +237,17 @@ while choice != 6:
                 # to remove a doctor from database
                 elif staff_choice == 3:
                     id = input('Enter doctor ID to be removed: ')
-                    sql = "DELETE FROM doctor WHERE id = \"" + id + "\""
+                    sql = "SELECT id from doctor"
                     mycursor.execute(sql)
-                    hdl.commit()
-                    print("Doctor ID " + id +
-                          " removed from database, going back to Staff Menu")
+                    idList = mycursor.fetchall()
+                    if (id,) in idList:
+                        sql = "DELETE FROM doctor WHERE id = \"" + id + "\""
+                        mycursor.execute(sql)
+                        hdl.commit()
+                        print("Doctor ID " + id +
+                            " removed from database, going back to Staff Menu")
+                    else:
+                        print('Invalid ID, going back to Staff Menu')
 
                 # to add new staff login ID
                 elif staff_choice == 4:
@@ -256,11 +262,17 @@ while choice != 6:
                 # to remove an existing staff ID
                 elif staff_choice == 5:
                     id = input('Enter staff ID to be removed: ')
-                    sql = "DELETE FROM login WHERE id = \"" + id + "\""
+                    sql = "SELECT id from login"
                     mycursor.execute(sql)
-                    hdl.commit()
-                    print("Staff ID " + id +
-                          " removed from database, going back to Staff Menu")
+                    idList = mycursor.fetchall()
+                    if (id,) in idList:
+                        sql = "DELETE FROM login WHERE id = \"" + id + "\""
+                        mycursor.execute(sql)
+                        hdl.commit()
+                        print("Staff ID " + id +
+                            " removed from database, going back to Staff Menu")
+                    else:
+                        print('Invalid ID, going back to Staff Menu')
 
                 # to clear out all appointments for the day in the database
                 elif staff_choice == 6:
