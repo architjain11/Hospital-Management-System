@@ -1,4 +1,3 @@
-from tkinter import E
 import mysql.connector
 from mysql.connector import Error
 from stdiomask import getpass
