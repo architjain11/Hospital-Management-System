@@ -19,10 +19,13 @@ We can access the command prompt of the container using container ID.
 ```bash
 docker exec -it <containerID> bash
 ```
-The two containers communicate between one another using MySQL Connector which is installed on the Python container where we'll run our Python script. 
+The two containers communicate between one another using MySQL Connector and the password is entered wherever required using stdiomask library which displays asterisks '*' as password is entered unlike python's built-in getpass library which hides what is entered. Both can be installed in the Python container where we run our script.
 
 ```bash
 pip install mysql-connector-python
+```
+```bash
+from stdiomask import getpass
 ```
 In the MySQL container, we can start MySQL using the below cmd.
 
